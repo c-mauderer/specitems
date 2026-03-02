@@ -19,7 +19,7 @@ The package is maintained by the
 project.  Users of the package are
 [specware](https://github.com/specthings/specitems)
 and
-[specbuild](https://github.com/specthings/specbuild).
+[specmake](https://github.com/specthings/specmake).
 
 ## Contributing
 
