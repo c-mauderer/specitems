@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-2-Clause
 """ Provides interfaces for reST content generation. """
 
-# Copyright (C) 2019, 2025 embedded brains GmbH & Co. KG
+# Copyright (C) 2019, 2026 embedded brains GmbH & Co. KG
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -193,8 +193,8 @@ class SphinxContent(TextContent):
         return _REST_SPECIAL_CHAR.sub(_rest_escape, text)
 
     def add_label(self, label: str) -> None:
-        """ Adds a label. """
-        self.add(".. _" + label.strip() + ":")
+        """ Adds the label. """
+        self.add([".. _" + label.strip() + ":", ""])
 
     def add_header(self,
                    name: str,
@@ -204,10 +204,10 @@ class SphinxContent(TextContent):
         if label is not None:
             self.add_label(label)
         name = name.strip()
-        self.add([name, _HEADER_LEVELS[level] * len(name)])
+        self.add([name, _HEADER_LEVELS[level] * len(name), ""])
 
     def add_rubric(self, name: str) -> None:
-        self.add(f".. rubric:: {name}")
+        self.add([f".. rubric:: {name}", ""])
 
     def add_image(self, base: str, width: Optional[str] = None) -> None:
         """
@@ -232,8 +232,8 @@ class SphinxContent(TextContent):
         self.ensure_blank_line()
         self.append(f".. {name.strip()}::{value}")
         self.push_indent()
-        self.add(options)
-        self.gap = True
+        self.append(options)
+        self.add_blank_line()
 
     def close_directive(self) -> None:
         self.pop_indent()

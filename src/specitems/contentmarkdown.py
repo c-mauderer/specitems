@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-2-Clause
 """ Provides interfaces for MyST Markdown content generation. """
 
-# Copyright (C) 2025 embedded brains GmbH & Co. KG
+# Copyright (C) 2025, 2026 embedded brains GmbH & Co. KG
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -86,7 +86,7 @@ class MarkdownContent(TextContent):
     def add_header(self, name, level=1, label=None) -> None:
         if label is not None:
             self.add(f"({label.strip()})=")
-        self.add(f"{level * '#'} {name.strip()}")
+        self.add([f"{level * '#'} {name.strip()}", ""])
 
     def add_index_entries(self, entries: list[str]) -> None:
         for entry in entries:
@@ -109,7 +109,7 @@ class MarkdownContent(TextContent):
         self.append("```")
 
     def add_rubric(self, name: str) -> None:
-        self.add(["```{eval-rst}", f".. rubric:: {name}", "```"])
+        self.add(["```{eval-rst}", f".. rubric:: {name}", "```", ""])
 
     def add_definition_item(self, name: GenericContent,
                             definition: GenericContent) -> None:

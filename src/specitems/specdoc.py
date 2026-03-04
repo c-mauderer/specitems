@@ -464,11 +464,8 @@ class _Documenter:
         with self._content.section(
                 self.section,
                 label=f"{self._label_prefix}{make_label(self.section)}"):
-            last = self._content.lines[-1]
             self._add_description()
             if len(self._info_map) == 1:
-                if last == self._content.lines[-1]:
-                    self._content.add_blank_line()
                 key, info = next(iter(self._info_map.items()))
                 _DOCUMENT[key](self, key, "shall", info)
             else:

@@ -63,6 +63,7 @@ def test_add_label():
     content = SphinxContent()
     content.add_label("x")
     assert str(content) == """.. _x:
+
 """
 
 
@@ -75,6 +76,7 @@ def test_label_scope():
 
 y
 #
+
 """
 
 
@@ -106,6 +108,7 @@ def test_add_header():
     content.add_header("x")
     assert str(content) == """x
 #
+
 """
     content.add_header("yz", 1)
     assert str(content) == """x
@@ -113,6 +116,7 @@ def test_add_header():
 
 yz
 **
+
 """
 
 
@@ -120,6 +124,7 @@ def test_add_rubric():
     content = SphinxContent()
     content.add_rubric("x")
     assert str(content) == """.. rubric:: x
+
 """
 
 
@@ -267,6 +272,7 @@ seven eight nine ten
     content = SphinxContent("BSD-2-Clause")
     content.wrap("""```not closed""")
     assert str(content) == """.. code-block:: not closed
+
 """
     content = SphinxContent("BSD-2-Clause")
     content.wrap("""`code`
@@ -374,6 +380,7 @@ def test_add_image():
     content.add_image("abc")
     assert str(content) == """.. image:: abc
     :align: center
+
 """
     content.add_image("def", "50%")
     assert str(content) == """.. image:: abc
@@ -382,6 +389,7 @@ def test_add_image():
 .. image:: def
     :align: center
     :width: 50%
+
 """
 
 

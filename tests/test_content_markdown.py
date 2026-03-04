@@ -66,6 +66,7 @@ def test_mark_down_header():
 (label)=
 
 ###### header
+
 """
     assert content.beautify() == """# header
 
@@ -106,6 +107,7 @@ def test_mark_down_rubric():
     assert str(content) == """```{eval-rst}
 .. rubric:: name
 ```
+
 """
     assert content.beautify() == """```{eval-rst}
 .. rubric:: name
