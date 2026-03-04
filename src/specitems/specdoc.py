@@ -95,8 +95,8 @@ class _AssertContext:
 
     def comma(self):
         """ Add a comma to the content if necessary. """
-        if not self.content.lines[-1].endswith(","):
-            self.content.lines[-1] += self._comma
+        if not self.content.last.endswith(","):
+            self.content.last += self._comma
             self._comma = ","
 
     def paste(self, text: str):
@@ -141,7 +141,7 @@ def _document_op_and_or(ctx: _AssertContext, negate: bool, assert_info: Any,
     if len(assert_info) == 1:
         _document_assert(ctx, negate, assert_info[0])
     else:
-        if negate or ctx.content.lines[-1].endswith("- "):
+        if negate or ctx.content.last.endswith("- "):
             ctx.paste(f"shall {_negate(negate)}meet")
         intro = ""
         for element in assert_info:
@@ -277,7 +277,7 @@ def _maybe_document_assert(content: TextContent, type_info: Any) -> None:
         content.paste("The value ")
         _document_assert(_AssertContext(content, _DOCUMENT_OPS), False,
                          assert_info)
-        content.lines[-1] += "."
+        content.last += "."
 
 
 class _Documenter:

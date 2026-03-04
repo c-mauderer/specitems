@@ -42,6 +42,8 @@ from .content import (
     get_value_plural,
     list_terms,
     make_copyright_statement,
+    make_lines,
+    make_text,
     split_copyright_statement,
     to_camel_case,
 )
@@ -205,7 +207,9 @@ __all__ = [
     "load_data_by_uid",
     "make_copyright_statement",
     "make_label",
+    "make_lines",
     "make_subprocess_environment",
+    "make_text",
     "pickle_load_data_by_uid",
     "run_subprocess_action",
     "save_data",

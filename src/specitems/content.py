@@ -149,13 +149,26 @@ class Copyrights(dict):
 
 def make_lines(content: Optional[GenericContent]) -> list[str]:
     """ Make a list of lines from the generic content. """
+    # pylint: disable=protected-access
     if isinstance(content, str):
         return content.strip("\n").split("\n")
     if isinstance(content, list):
         return content
     if content is None:
         return []
-    return content.lines
+    return content._lines
+
+
+def make_text(content: Optional[GenericContent]) -> str:
+    """ Make a text from the generic content. """
+    # pylint: disable=protected-access
+    if isinstance(content, str):
+        return content.strip("\n")
+    if isinstance(content, list):
+        return "\n".join(content)
+    if content is None:
+        return ""
+    return "\n".join(content._lines)
 
 
 def _indent(lines: list[str], indent: str,
@@ -196,7 +209,7 @@ class Content(abc.ABC):
         self.gap = False
         self.text_width = 79
         self.copyrights = Copyrights()
-        self.lines: list[str] = []
+        self._lines: list[str] = []
         if the_license is None:
             the_license = {"CC-BY-SA-4.0"}
         elif isinstance(the_license, str):
@@ -211,17 +224,17 @@ class Content(abc.ABC):
         self._comment_prefix = "#"
 
     def __iter__(self):
-        yield from self.lines
+        yield from self._lines
 
     def __bool__(self):
-        return bool(self.lines)
+        return bool(self._lines)
 
     def __str__(self):
-        return "\n".join(itertools.chain(self.lines, [""]))
+        return "\n".join(itertools.chain(self._lines, [""]))
 
     def join(self, linesep: str = "\n") -> str:
         """ Join the lines using the line separator to a string. """
-        return linesep.join(self.lines)
+        return linesep.join(self._lines)
 
     @property
     def tab(self) -> str:
@@ -233,16 +246,25 @@ class Content(abc.ABC):
         """ The licenses of the content in SPDX format. """
         return " OR ".join(sorted(self._license))
 
+    @property
+    def last(self) -> str:
+        """ Is the last line. """
+        return self._lines[-1]
+
+    @last.setter
+    def last(self, line: str) -> None:
+        self._lines[-1] = line
+
     def append(self, content: Optional[GenericContent]) -> None:
         """ Append the content. """
-        self.lines.extend(
+        self._lines.extend(
             _indent(make_lines(content), self._indent,
                     self._empty_line_indent))
 
     def prepend(self, content: Optional[GenericContent]) -> None:
         """ Prepend the content. """
-        self.lines[0:0] = _indent(make_lines(content), self._indent,
-                                  self._empty_line_indent)
+        self._lines[0:0] = _indent(make_lines(content), self._indent,
+                                   self._empty_line_indent)
 
     def add(self,
             content: Optional[GenericContent],
@@ -257,7 +279,7 @@ class Content(abc.ABC):
             if line:
                 self._add_gap()
                 with context(self):
-                    self.lines.extend(
+                    self._lines.extend(
                         _indent(lines[index:], self._indent,
                                 self._empty_line_indent))
                 break
@@ -336,8 +358,8 @@ class Content(abc.ABC):
                     else:
                         wrapper.initial_indent = initial_indent
                 block = self.convert(block)
-                self.lines.extend(gap)
-                self.lines.extend(
+                self._lines.extend(gap)
+                self._lines.extend(
                     _indent(wrapper.wrap(block), self._indent,
                             self._empty_line_indent))
                 gap = [self._empty_line_indent]
@@ -348,47 +370,34 @@ class Content(abc.ABC):
              subsequent_indent: Optional[str] = None,
              context: ContentAddContext = _add_context) -> None:
         """ Add a gap if needed, then add the wrapped content.  """
-        if not content:
-            return
-        if isinstance(content, str):
-            text = content
-        elif isinstance(content, list):
-            text = "\n".join(content)
-        else:
-            text = "\n".join(content.lines)
-        text = text.strip()
+        text = make_text(content).strip()
         if not text:
             return
         self.wrap_text(text, initial_indent, subsequent_indent, context)
 
     def paste(self, content: Optional[GenericContent]) -> None:
         """ Paste the wrapped content directly to the last line.  """
-        if not content:
+        text = make_text(content).strip()
+        if not text:
             return
-        if isinstance(content, str):
-            text = content
-        elif isinstance(content, list):
-            text = "\n".join(content)
-        else:
-            text = "\n".join(content.lines)
         indent_len = len(self._indent)
-        last_index = len(self.lines) - 1
+        last_index = len(self._lines) - 1
         if last_index >= 0:
-            last = self.lines[-1]
+            last = self._lines[-1]
             if last:
-                self.lines.pop()
+                self._lines.pop()
                 more = last[indent_len:]
                 if more:
                     text = f"{more} {text}"
         self.gap = False
         self.wrap_text(text)
         if last_index >= 0:
-            line = self.lines[last_index][indent_len:]
-            self.lines[last_index] = f"{last[:indent_len]}{line}"
+            line = self._lines[last_index][indent_len:]
+            self._lines[last_index] = f"{last[:indent_len]}{line}"
 
     def _add_gap(self) -> None:
-        if self.gap and self.lines and self.lines[-1]:
-            self.lines.extend(
+        if self.gap and self._lines and self._lines[-1]:
+            self._lines.extend(
                 _indent([""], self._indent, self._empty_line_indent))
         self.gap = True
 
@@ -436,17 +445,17 @@ class Content(abc.ABC):
     def indent_lines(self, level: int) -> None:
         """ Indent all lines by the specified indent level. """
         prefix = level * self._tab
-        self.lines = [prefix + line if line else line for line in self.lines]
+        self._lines = [prefix + line if line else line for line in self._lines]
 
     def add_blank_line(self):
         """ Add a blank line. """
-        self.lines.append("")
+        self._lines.append("")
         self.gap = False
 
     def ensure_blank_line(self):
         """ Ensure that the last line is blank. """
-        if self.lines and self.lines[-1]:
-            self.lines.append("")
+        if self._lines and self._lines[-1]:
+            self._lines.append("")
             self.gap = False
 
     def register_license(self, the_license: str) -> None:
