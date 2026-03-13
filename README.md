@@ -26,4 +26,4 @@ and
 Please refer to our
 [Contributing Guidelines](https://github.com/specthings/specitems/blob/main/CONTRIBUTING.md).
 
-Foo
+Bar
