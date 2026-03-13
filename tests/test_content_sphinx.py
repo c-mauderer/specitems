@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-2-Clause
 """ Tests for the contentsphinx module. """
 
-# Copyright (C) 2020, 2025 embedded brains GmbH & Co. KG
+# Copyright (C) 2020, 2026 embedded brains GmbH & Co. KG
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -26,11 +26,9 @@
 
 import pytest
 
-from specitems.contentsphinx import get_reference, SphinxContent, SphinxMapper
-from specitems.contenttext import make_label
-from specitems.glossary import augment_glossary_terms
-from specitems.items import EmptyItem, Item, ItemCache, SpecTypeProvider
-from specitems.itemmapper import ItemMapper
+from specitems import (COL_SPAN, EmptyItem, Item, ItemCache, ItemMapper,
+                       ROW_SPAN, SpecTypeProvider, SphinxContent, SphinxMapper,
+                       augment_glossary_terms, get_reference, make_label)
 
 from .util import create_item_cache_config, get_other_type_data_by_uid
 
@@ -600,10 +598,12 @@ def test_grid_table():
     content = SphinxContent()
     content.add_grid_table([], [])
     assert str(content) == ""
-    content.add_grid_table([["a", "b"], ["cc", "ddd"]], [50, 50])
+    content.add_grid_table([["a", "b"], ["cc", "ddd"]], widths=[50, 50])
     content.add_grid_table(
-        [["1", "2", "3"], ["aa", "bbb", "cccc"], ["ddd", "", "e"],
-         ["ff", "g", "h"], ["", "i", "j"]], [30, 30, 40])
+        [["1", "2", "3"], ["aa", "bbb", "cccc"], ["ddd", COL_SPAN, "e"],
+         ["ff", "g", "h"], [COL_SPAN, "i", ROW_SPAN],
+         [COL_SPAN, COL_SPAN, COL_SPAN | ROW_SPAN]],
+        widths=[30, 30, 40])
     assert str(content) == """.. table::
     :class: longtable
     :widths: 50,50
@@ -627,7 +627,9 @@ def test_grid_table():
     +-----+-----+------+
     | ff  | g   | h    |
     +     +-----+------+
-    |     | i   | j    |
+    |     | i          |
+    +     +            +
+    |     |            |
     +-----+-----+------+
 """
 

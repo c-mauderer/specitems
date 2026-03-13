@@ -53,6 +53,9 @@ _LATEX_SIZES = {
     5: "Huge",
 }
 
+COL_SPAN = 1
+ROW_SPAN = 2
+
 
 def _latex_font_size(size: str | int) -> str:
     if isinstance(size, str):
@@ -80,14 +83,25 @@ def _simple_row(row: Iterable[str], maxi: Iterable[int]) -> str:
     return line.rstrip()
 
 
+def _cell_len(cell: str | int) -> int:
+    return len(cell) if isinstance(cell, str) else 0
+
+
 def _grid_sep(maxi: Iterable[int], sep: str) -> str:
     return f"+{sep}" + f"{sep}+{sep}".join(f"{sep * width}"
                                            for width in maxi) + f"{sep}+"
 
 
-def _grid_row(row: Iterable[str], maxi: Iterable[int]) -> str:
-    line = " | ".join(f"{cell:{width}}" for cell, width in zip(row, maxi))
-    return f"| {line} |"
+def _grid_row(row: Iterable[str | int], maxi: Iterable[int]) -> str:
+    line = ""
+    for cell, width in zip(row, maxi):
+        if isinstance(cell, str):
+            line = f"{line} | {cell:{width}}"
+        elif (cell & ROW_SPAN) == 0:
+            line = f"{line} | {' ' * width}"
+        else:
+            line = f"{line}   {' ' * width}"
+    return f"|{line[2:]} |"
 
 
 def _format_line(line: str) -> str:
@@ -305,8 +319,9 @@ class SphinxContent(TextContent):
         self._add_table(lines, widths, font_size)
 
     def add_grid_table(self,
-                       rows: Sequence[Iterable[str]],
+                       rows: Sequence[Iterable[str | int]],
                        widths: Optional[list[int]] = None,
+                       header_rows: int = 1,
                        font_size: Optional[str | int] = None) -> None:
         """
         Add a grid table with the rows, optional widths, and optional font
@@ -314,21 +329,26 @@ class SphinxContent(TextContent):
         """
         if not rows:
             return
-        maxi = tuple(map(len, rows[0]))
+        maxi = tuple(map(_cell_len, rows[0]))
         for row in rows:
-            row_lengths = tuple(map(len, row))
+            row_lengths = tuple(map(_cell_len, row))
             maxi = tuple(map(max, zip(maxi, row_lengths)))
         begin_end = _grid_sep(maxi, "-")
-        lines = [begin_end, _grid_row(rows[0], maxi), _grid_sep(maxi, "=")]
-        for index, row in enumerate(rows[1:]):
+        lines = [begin_end]
+        for index, row in enumerate(rows):
             if index > 0:
                 sep = ""
                 for cell, width in zip(row, maxi):
-                    if cell:
-                        sep += f"+{'-' * (width + 2)}"
+                    if isinstance(cell, str) or (cell & COL_SPAN) == 0:
+                        if index == header_rows:
+                            sep = f"{sep}+{'=' * (width + 2)}"
+                        else:
+                            sep = f"{sep}+{'-' * (width + 2)}"
+                    elif (cell & ROW_SPAN) == 0:
+                        sep = f"{sep}+{' ' * (width + 2)}"
                     else:
-                        sep += f"+{' ' * (width + 2)}"
-                lines.append(sep + "+")
+                        sep = f"{sep} {' ' * (width + 2)}"
+                lines.append(f"{sep}+")
             lines.append(_grid_row(row, maxi))
         lines.append(begin_end)
         self._add_table(lines, widths, font_size)

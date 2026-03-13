@@ -58,6 +58,8 @@ from .contentmarkdown import (
     MarkdownMapper,
 )
 from .contentsphinx import (
+    COL_SPAN,
+    ROW_SPAN,
     SphinxContent,
     SphinxMapper,
     escape_code_line,
@@ -134,6 +136,7 @@ from .subprocessaction import (
 
 __all__ = [
     "BibTeXCitationProvider",
+    "COL_SPAN",
     "Content",
     "ContentAddContext",
     "Copyright",
@@ -167,6 +170,7 @@ __all__ = [
     "MARKDOWN_ROLES",
     "MarkdownContent",
     "MarkdownMapper",
+    "ROW_SPAN",
     "SpecDocumentConfig",
     "SpecTypeProvider",
     "SpecVerifier",
