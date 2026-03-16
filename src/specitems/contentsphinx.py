@@ -377,12 +377,20 @@ class SphinxContent(TextContent):
         lines.append(begin_end)
         self._add_table(lines, widths, font_size)
 
-    def add_code_block(self, code: list[str]) -> None:
+    def add_code_block(self,
+                       code: list[str],
+                       language: str = "none",
+                       font_size: str | int = "footnotesize") -> None:
         """ Add the code block. """
-        for line in range(0, len(code), 100):
-            with self.directive("code-block", value="none"):
-                self.add(
-                    [_format_line(line) for line in code[line:line + 100]])
+        with self.latex_font_size(font_size):
+            for index in range(0, len(code), 100):
+                options = [":linenos:", f":lineno-start: {index + 1}"]
+                with self.directive("code-block",
+                                    value=language,
+                                    options=options):
+                    self.add([
+                        _format_line(line) for line in code[index:index + 100]
+                    ])
 
     def add_program_output(self,
                            output: list[str],

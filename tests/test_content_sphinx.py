@@ -684,9 +684,19 @@ def test_add_code_block():
     content.add_code_block([])
     assert str(content) == ""
     content.add_code_block(["a"])
-    assert str(content) == """.. code-block:: none
+    assert str(content) == """.. raw:: latex
+
+    \\begin{footnotesize}
+
+.. code-block:: none
+    :linenos:
+    :lineno-start: 1
 
     ​a
+
+.. raw:: latex
+
+    \\end{footnotesize}
 """
 
 
